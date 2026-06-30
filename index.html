@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sertão Maldito — Caderno de Bordo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&family=Bitter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <header class="sidebar-head">
+        <h1 class="brand"><span class="brand-line1">Sertão</span><span class="brand-line2">Maldito</span></h1>
+        <button class="btn-new" id="btn-new" title="Nova nota">＋ Nova</button>
+      </header>
+
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="Buscar notas…" autocomplete="off">
+      </div>
+
+      <div class="tag-filter" id="tag-filter"></div>
+
+      <ul class="note-list" id="note-list"></ul>
+
+      <footer class="sidebar-foot">
+        <button class="icon-btn" id="btn-theme" title="Alternar tema">◐ Tema</button>
+        <span class="count" id="note-count"></span>
+      </footer>
+    </aside>
+
+    <!-- Main: editor + preview -->
+    <main class="main">
+      <div class="toolbar">
+        <button class="icon-btn drawer-toggle" id="drawer-toggle" title="Notas">☰</button>
+        <input type="text" id="title-input" class="title-input" placeholder="Título da nota">
+        <div class="toolbar-actions">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-pane="editor">Editar</button>
+            <button class="tab" data-pane="preview">Visualizar</button>
+          </div>
+          <button class="icon-btn" id="btn-export-md" title="Exportar Markdown">.md</button>
+          <button class="icon-btn" id="btn-export-html" title="Exportar HTML">.html</button>
+          <button class="icon-btn danger" id="btn-delete" title="Excluir nota">🗑</button>
+        </div>
+      </div>
+
+      <div class="tags-row">
+        <input type="text" id="tags-input" class="tags-input"
+               placeholder="Tags separadas por vírgula (ou use #tag no texto)">
+      </div>
+
+      <div class="split">
+        <section class="pane editor-pane" id="pane-editor">
+          <textarea id="editor" spellcheck="true"
+                    placeholder="Escreva em Markdown…&#10;&#10;# Título&#10;**negrito**, *itálico*, `código`&#10;- lista&#10;> citação"></textarea>
+        </section>
+        <section class="pane preview-pane" id="pane-preview">
+          <div class="preview" id="preview"></div>
+        </section>
+      </div>
+
+      <div class="empty-state" id="empty-state" hidden>
+        <div class="welcome-mark">✶</div>
+        <h2 class="welcome-title">Sertão Maldito</h2>
+        <p class="welcome-sub">Seu caderno de bordo do sertão. Nenhuma nota aberta.</p>
+        <button class="btn-new" id="btn-new-empty">＋ Criar primeira nota</button>
+      </div>
+
+      <div class="statusbar">
+        <span id="save-status">Pronto</span>
+        <span id="meta-info"></span>
+      </div>
+    </main>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
