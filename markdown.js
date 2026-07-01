@@ -47,6 +47,51 @@ function parseInline(text) {
   return text;
 }
 
+// Split a table row into cells, honoring escaped pipes (\|) and trimming the
+// optional leading/trailing pipes. Returns an array of raw cell strings.
+function splitRow(line) {
+  const cells = [];
+  let cur = '';
+  for (let k = 0; k < line.length; k++) {
+    const ch = line[k];
+    if (ch === '\\' && line[k + 1] === '|') { cur += '|'; k++; continue; }
+    if (ch === '|') { cells.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  cells.push(cur);
+  // drop empty edges produced by the optional outer pipes
+  if (cells.length && cells[0].trim() === '') cells.shift();
+  if (cells.length && cells[cells.length - 1].trim() === '') cells.pop();
+  return cells.map((c) => c.trim());
+}
+
+// A separator row: cells made only of dashes with optional :align: colons.
+function isTableSeparator(line) {
+  if (!/\|/.test(line) && !/^\s*:?-+:?\s*$/.test(line)) return false;
+  const cells = splitRow(line);
+  if (cells.length === 0) return false;
+  return cells.every((c) => /^:?-+:?$/.test(c));
+}
+
+function cellAlign(sep) {
+  const left = sep.startsWith(':');
+  const right = sep.endsWith(':');
+  if (left && right) return 'center';
+  if (right) return 'right';
+  if (left) return 'left';
+  return '';
+}
+
+// A table needs a header row containing a pipe, a valid separator on the next
+// line, and matching column counts — the column check keeps a plain `text ---`
+// (setext-ish / horizontal rule) from being mistaken for a table.
+function looksLikeTable(header, sep) {
+  if (header == null || sep == null) return false;
+  if (!/\|/.test(header)) return false;
+  if (!isTableSeparator(sep)) return false;
+  return splitRow(header).length === splitRow(sep).length;
+}
+
 export function renderMarkdown(src) {
   const lines = (src || '').split('\n');
   const out = [];
@@ -102,6 +147,33 @@ export function renderMarkdown(src) {
       continue;
     }
 
+    // table: a header row followed by a |---|---| separator row
+    if (looksLikeTable(line, lines[i + 1])) {
+      closeLists();
+      const headers = splitRow(line);
+      const aligns = splitRow(lines[i + 1]).map(cellAlign);
+      i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].trim() !== '' && /\|/.test(lines[i])) {
+        rows.push(splitRow(lines[i]));
+        i++;
+      }
+      const alignAttr = (idx) => (aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '');
+      let html = '<table><thead><tr>';
+      headers.forEach((h, idx) => { html += `<th${alignAttr(idx)}>${parseInline(h)}</th>`; });
+      html += '</tr></thead><tbody>';
+      for (const cells of rows) {
+        html += '<tr>';
+        for (let idx = 0; idx < headers.length; idx++) {
+          html += `<td${alignAttr(idx)}>${parseInline(cells[idx] || '')}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      out.push(html);
+      continue;
+    }
+
     // lists
     const ul = line.match(/^(\s*)[-*]\s+(.*)$/);
     const ol = line.match(/^(\s*)\d+\.\s+(.*)$/);
@@ -146,7 +218,8 @@ export function renderMarkdown(src) {
       lines[i].trim() !== '' &&
       !/^(#{1,6}\s|\s*>\s?|```|\s*(-{3,}|\*{3,}|_{3,})\s*$)/.test(lines[i]) &&
       !/^(\s*)[-*]\s+/.test(lines[i]) &&
-      !/^(\s*)\d+\.\s+/.test(lines[i])
+      !/^(\s*)\d+\.\s+/.test(lines[i]) &&
+      !looksLikeTable(lines[i], lines[i + 1])
     ) { buf.push(lines[i]); i++; }
     out.push(`<p>${parseInline(buf.join('\n')).replace(/\n/g, '<br>')}</p>`);
   }

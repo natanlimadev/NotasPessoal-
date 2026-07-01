@@ -42,6 +42,7 @@
             <button class="tab active" data-pane="editor">Editar</button>
             <button class="tab" data-pane="preview">Visualizar</button>
           </div>
+          <button class="icon-btn" id="btn-table" title="Inserir tabela">⊞ Tabela</button>
           <button class="icon-btn" id="btn-export-md" title="Exportar Markdown">.md</button>
           <button class="icon-btn" id="btn-export-html" title="Exportar HTML">.html</button>
           <button class="icon-btn danger" id="btn-delete" title="Excluir nota">🗑</button>
@@ -56,7 +57,7 @@
       <div class="split">
         <section class="pane editor-pane" id="pane-editor">
           <textarea id="editor" spellcheck="true"
-                    placeholder="Escreva em Markdown…&#10;&#10;# Título&#10;**negrito**, *itálico*, `código`&#10;- lista&#10;> citação"></textarea>
+                    placeholder="Escreva em Markdown…&#10;&#10;# Título&#10;**negrito**, *itálico*, `código`&#10;- lista&#10;> citação&#10;&#10;| Coluna A | Coluna B |&#10;| -------- | -------- |&#10;| valor 1  | valor 2  |"></textarea>
         </section>
         <section class="pane preview-pane" id="pane-preview">
           <div class="preview" id="preview"></div>
