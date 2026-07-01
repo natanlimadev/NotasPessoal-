@@ -218,6 +218,29 @@ async function deleteCurrent() {
   }
 }
 
+// ---- insert table template ----
+function insertTable() {
+  if (!currentId) return;
+  const tpl =
+    '| Coluna A | Coluna B | Coluna C |\n' +
+    '| :------- | :------: | -------: |\n' +
+    '| valor 1  | valor 2  | valor 3  |\n' +
+    '| valor 4  | valor 5  | valor 6  |\n';
+  const ed = els.editor;
+  const start = ed.selectionStart;
+  const end = ed.selectionEnd;
+  const before = ed.value.slice(0, start);
+  const after = ed.value.slice(end);
+  // ensure the table starts on its own line (blank line above if needed)
+  const prefix = before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n';
+  const insert = prefix + tpl;
+  ed.value = before + insert + after;
+  const caret = start + insert.length;
+  ed.focus();
+  ed.selectionStart = ed.selectionEnd = caret;
+  onEdit();
+}
+
 // ---- export ----
 function download(filename, content, type) {
   const blob = new Blob([content], { type });
@@ -258,6 +281,14 @@ function exportHTML() {
   blockquote { border-left: 3px solid #c2641a; margin: 1em 0; padding: .4em 1em;
     color: #6b6357; font-style: italic; }
   hr { border: none; border-top: 1px solid #e0d8c8; }
+  table { width: 100%; border-collapse: collapse; margin: 1.2em 0;
+    border: 1px solid #e0d8c8; font-size: .95em; }
+  th, td { padding: 9px 14px; border-bottom: 1px solid #e0d8c8;
+    border-right: 1px solid #e0d8c8; text-align: left; vertical-align: top; }
+  th:last-child, td:last-child { border-right: none; }
+  thead th { background: #efe9dc; border-bottom: 2px solid #c2641a;
+    font-weight: 600; }
+  tbody tr:nth-child(even) { background: rgba(194,100,26,.05); }
 </style></head>
 <body>${body}</body></html>`;
   download(safeName(els.title.value) + '.html', html, 'text/html');
@@ -285,6 +316,7 @@ function bind() {
   $('btn-new').addEventListener('click', newNote);
   $('btn-new-empty').addEventListener('click', newNote);
   $('btn-delete').addEventListener('click', deleteCurrent);
+  $('btn-table').addEventListener('click', insertTable);
   $('btn-export-md').addEventListener('click', exportMD);
   $('btn-export-html').addEventListener('click', exportHTML);
   $('btn-theme').addEventListener('click', toggleTheme);
